@@ -35,8 +35,8 @@ RCPP=$R_LOCAL_LIB/Rcpp
 # RCPP=$R_HOME/Resources/Rcpp
 
 #system-wide tcl
-TCL_INCLUDE=/usr/local/include/tcl
-TCL_LIB=/usr/local/lib
+TCL_INCLUDE=/usr/include/tch8.6
+TCL_LIB=/usr/lib
 TCL_LIBRARY=tcl8.6
 
 # a local tcl
