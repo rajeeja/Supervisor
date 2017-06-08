@@ -23,6 +23,23 @@ def write_params(params, hyper_parameter_map):
                 v = "'{}'".format(v)
             f_out.write("{}={}\n".format(k, v))
 
+def is_numeric(val):
+    try:
+        float(val)
+        return True
+    except ValueError:
+        return False
+
+def format_params(hyper_parameter_map):
+    for k,v in hyper_parameter_map.items():
+        vals = str(v).split(" ")
+        if len(vals) > 1 and is_numeric(vals[0]):
+            # assume this should be a list
+            if "." in vals[0]:
+                hyper_parameter_map[k] = [float(x) for x in vals]
+            else:
+                hyper_parameter_map[k] = [int(x) for x in vals]
+
 def run(hyper_parameter_map):
     framework = hyper_parameter_map['framework']
     if framework is 'keras':
@@ -39,6 +56,8 @@ def run(hyper_parameter_map):
 
     # params is python dictionary
     params = pkg.initialize_parameters()
+    format_params(hyper_parameter_map)
+
     for k,v in hyper_parameter_map.items():
         #if not k in params:
         #    raise Exception("Parameter '{}' not found in set of valid arguments".format(k))
@@ -59,3 +78,26 @@ def run(hyper_parameter_map):
     # use the last validation_loss as the value to minimize
     val_loss = history.history['val_loss']
     return val_loss[-1]
+
+def write_output(result, instance_directory):
+    with open('{}/result.txt'.format(instance_directory), 'w') as f_out:
+        f_out.write("{}\n".format(result))
+
+def init(param_file, instance_directory):
+    with open(param_file) as f_in:
+        hyper_parameter_map = json.load(f_in)
+
+    hyper_parameter_map['framework'] = 'keras'
+    hyper_parameter_map['save'] = '{}/output'.format(instance_directory)
+    hyper_parameter_map['instance_directory'] = instance_directory
+    
+    return hyper_parameter_map
+
+if __name__ == '__main__':
+    param_file = sys.argv[1]
+    instance_directory = sys.argv[2]
+    hyper_parameter_map = init(param_file, instance_directory)
+    # clear sys.argv so that argparse doesn't object
+    sys.argv = ['p1b3_runner']
+    result = run(hyper_parameter_map)
+    write_output(result, instance_directory)

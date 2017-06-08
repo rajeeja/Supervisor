@@ -2,9 +2,9 @@
 
 set -eu
 
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 1 ]; then
   script_name=$(basename $0)
-  echo "Usage: ${script_name} EXPERIMENT_ID SWIFT_FILE (e.g. ${script_name} experiment_1 workflow.swift)"
+  echo "Usage: ${script_name} EXPERIMENT_ID (e.g. ${script_name} experiment_1)"
   exit 1
 fi
 
@@ -34,8 +34,7 @@ export TURBINE_JOBNAME="${EXPID}_job"
 # uncommented and set correctly.
 # export R_HOME=/path/to/R
 # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$R_HOME/lib
-BENCHMARK_DIR="$EMEWS_PROJECT_ROOT/../../../Benchmarks/Pilot1/NT3"
-BENCHMARK_DIR+=":$EMEWS_PROJECT_ROOT/../../../Benchmarks/Pilot1/TC1"
+BENCHMARK_DIR=$EMEWS_PROJECT_ROOT/../../../Benchmarks/Pilot1/P1B3
 export PYTHONPATH=$EMEWS_PROJECT_ROOT/python:$EMEWS_PROJECT_ROOT/ext/EQ-Py:$BENCHMARK_DIR
 
 
@@ -50,13 +49,12 @@ EQR=$EMEWS_PROJECT_ROOT/ext/EQ-R
 MAX_CONCURRENT_EVALUATIONS=2
 MAX_ITERATIONS=3
 PARAM_SET_FILE="$EMEWS_PROJECT_ROOT/data/parameter_set.R"
-MODEL_NAME="nt3"
 
 # TODO edit command line arguments, e.g. -nv etc., as appropriate
 # for your EQ/R based run. $* will pass all of this script's
 # command line arguments to the swift script
 CMD_LINE_ARGS="$* -pp=$MAX_CONCURRENT_EVALUATIONS -it=$MAX_ITERATIONS "
-CMD_LINE_ARGS+="-param_set_file=$PARAM_SET_FILE -model_name=$MODEL_NAME"
+CMD_LINE_ARGS+="-param_set_file=$PARAM_SET_FILE "
 # Uncomment this for the BG/Q:
 #export MODE=BGQ QUEUE=default
 
@@ -77,5 +75,5 @@ log_script
 
 # echo's anything following this to standard out
 set -x
-SWIFT_FILE=$2
+SWIFT_FILE=ai_workflow.swift
 swift-t -n $PROCS $MACHINE -p -I $EQR -r $EQR $EMEWS_PROJECT_ROOT/swift/$SWIFT_FILE $CMD_LINE_ARGS
